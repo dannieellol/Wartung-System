@@ -1,0 +1,93 @@
+Options:
+	Prefix: &8*│ &c&lWartungen &8» 
+	NoPerms: Wartung.User
+	NoPermMsg: &bMoonSky &r| &cDu darfst das nicht!
+
+on join:
+	if {Wartungen} is true:
+		if player has permission "wartung.join":
+			stop
+	if {Wartungen} is true:
+		if player has permission "wartung.use":
+			stop			
+		if {Wartungen.%player%} is true:
+			stop
+		else:
+			wait 0 ticks
+			kick player because of "&7%nl%&b&lMoonSky%nl%      &7Der Server befindet sich &7derzeit%nl%&7 in &9Wartungen&7. Versuche es später erneut.%nl%&7%nl%&7Grund &8● &9Aufbau%nl%&7Eröffnung &8● &9%{Eröffnung}% %nl%&7"
+			stop
+			
+command /wartung [<text>] [<offlineplayer>]:
+	permission: Wartung.use
+	permission message: {@Prefix} {@NoPermMsg}
+	aliases: wartungen
+	trigger:
+		if arg-1 is not set:
+			send "&a» &7Korrekte Benutzung &8:"
+			send "&7 "
+			send "&a» &cBenutze &b➜ &e/wartung &8[&eAn&8]"
+			send "&a» &cBenutze &b➜ &e/wartung &8[&eAus&8]"
+			send "&a» &cBenutze &b➜ &e/wartung &8[&eAdd&8] &8[&eSpieler&8]"
+			send "&a» &cBenutze &b➜ &e/wartung &8[&eRemove&8] &8[&eSpieler&8]"
+			send "&7"
+			send "&a» &cBenutze &b➜ &e/eröffnung &8[&eDatum&8]"
+			stop
+		if arg-1 is "aus":
+			set {Wartungen} to false
+			broadcast "{@Prefix} &aDer Server ist nun nicht mehr in Wartungsarbeiten"
+			stop
+		if arg-1 is "an":
+			set {Wartungen} to true
+			broadcast "{@Prefix} &cDer Server befindet sich nun in Wartungsarbeiten."
+			loop all players:
+				if loop-player does not have permission "wartung.join":
+					kick loop-player due to "&7%nl%&b&lMoonSky%nl%      &7Der Server befindet sich &7derzeit%nl%&7 in &9Wartungen&7. Versuche es später erneut.%nl%&7%nl%&7Grund &8● &9Aufbau%nl%&7Eröffnung &8● &9%{Eröffnung}% %nl%&7"
+			stop
+		if arg-1 is "add":
+			if arg-2 is not set:
+				broadcast "{@Prefix} &a» &cBenutze &b➜ &7Wartung &8«&7Add&8» &8«&7Spieler&8»"
+				stop
+			else:
+				set {Wartungen.%arg-2%} to true
+				send "{@Prefix} &7Du hast %arg-2% &7zu den Wartungsarbeiten &ahinzugefügt&7."
+				stop
+		if arg-1 is "remove":
+			if arg-2 is not set:
+				send "{@Prefix} &a» &cBenutze &b➜ &7Wartung &8«&7Remove&8» &8«&7Spieler&8»"
+				stop
+			else:
+				set {Wartungen.%arg-2%} to false
+				send "{@Prefix} &7Du hast %arg-2% von den Wartungsarbeiten &centfernt&7."
+				stop
+		if arg-1 is "check":
+			if {Wartungen} is not set:
+				send "{@Prefix} &7Die &5Wartungsarbeiten&7 sind derzeit &cAus&7!"
+			if {Wartungen} is false:
+				send "{@Prefix} &7Die &5Wartungsarbeiten&7 sind derzeit &cAus&7!"
+				stop
+			if {Wartungen} is true:
+				send "{@Prefix} &7Die &5Wartungsarbeiten&7 sind derzeit &aAn&7!"
+				stop
+				
+on server list ping:
+	if {Wartungen} is true:
+		set motd to "&b&lMoonSky&7&l.de &8➜ &7» 1.8 - 1.20.2 «%nl%&4&l✖ OFFLINE &8➜ &cWARTUNGSARBEITEN"
+		stop
+	else:
+		set motd to "&b&lMoonSky&7&l.de &8➜ &7» 1.8 - 1.20.2 «%nl%&a&l✔ ONLINE &8➜ &a&lONLINE"
+		
+command /eröffnung [<text>]:
+	permission: Wartung.use
+	permission message: {@Prefix} {@NoPermMsg}
+	trigger:
+		if argument is set:
+			set {Eröffnung} to text argument
+			send "{@Prefix} &7Die Eröffnung wurde vorraussichtlich auf den &b%argument% &7gesetzt."
+			stop	
+		if argument is not set:
+			send "{@Prefix} &7Verwende &e/eröffnung &8[&eDatum&8]"
+			stop
+			
+on server list ping:
+	if {Wartungen} is false: 
+		set max player count to 250
